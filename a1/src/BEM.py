@@ -26,6 +26,7 @@ class BEM:
         
         self.glauertToggle = glauertToggle
         self.prandtlToggle = prandtlToggle
+        self.singleDOFMode = singleDOFMode
         
         if singleDOFMode:
             
@@ -135,7 +136,7 @@ class BEM:
         self.annulusAzimIndCorrected[ID] = self.annulusBladeAzimLoad2D[ID] / (2 * self.fstreamRho * (2 * np.pi* self.rotor.annulusLoc[ID] * self.rotor.rotorRadius) * self.fstreamVelc**2 * (1 - self.annulusAxialIndCorrected[ID]) * self.tsr * self.rotor.annulusLoc[ID])
         
         
-    def solveBEM(self, minError = 1e-5, maxIterations = 100, relaxationFactor = 0.3):
+    def classicSolver(self, minError = 1e-5, maxIterations = 100, relaxationFactor = 0.3):
         
         for i in range(maxIterations):
         
@@ -250,15 +251,16 @@ class BEM:
             print("")
             print("===================================================================")
             
-    def solveBEMv5(self, relaxationFactor=0.3):
+    def optzSolver(self):
         
         for annulusID in range(self.rotor.annuliQuantity):
         
             print(f"Solving for annulus ID = {annulusID} ...")
             
-            optz.shgo(optzFunctionv2, bounds = [(0,0.95), [0,0.95]], args = (self, annulusID), options = {"f_tol" : 1e-5, "disp" : False})
+            #optz.shgo(optzFunctionv2, bounds = [(0,0.95), [0,0.95]], args = (self, annulusID), options = {"f_tol" : 1e-5, "disp" : False})
             #optz.basinhopping(optzFunctionv2, [self.axialIndInit, 0], minimizer_kwargs = {"args" : (self, annulusID)})
-            #optz.direct(optzFunctionv2, bounds = [(0,0.95), [0,0.95]], args = (self, annulusID))
+            optz.direct(optzFunctionv2, bounds = [(0,0.95), [0,0.95]], args = (self, annulusID))
+            #optz.dual_annealing(optzFunctionv2, bounds = [(0,0.95), [0,0.95]], args = (self, annulusID))
             
             '''#Update final induction to calculate right loads
             self.annulusAxialInd = self.annulusAxialIndCorrected
