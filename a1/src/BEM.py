@@ -1,7 +1,9 @@
 import numpy as np
 import scipy.optimize as optz
 from glauertsCorrection import glauertsCorrectionSingleDOF
+from prandtlsCorrection import prandtlsCorrectionSingleDOF
 from miscTools import optzFunction
+from miscTools import optzFunction2Args
 
 
 class BEM:
@@ -17,32 +19,33 @@ class BEM:
         self.axialIndInit = axialIndInit
         
         self.rotorOmega = tsr * fstreamVelc / self.rotor.rotorRadius
+        self.annulusTSR = tsr * self.rotor.annulusLoc
         
-        self.annulusAxialInd = axialIndInit * np.ones(rotor.annuliQuantity)
-        self.annulusAzimInd = np.zeros(rotor.annuliQuantity)
+        self.annulusAxialInd = axialIndInit * np.ones(self.rotor.annuliQuantity)
+        self.annulusAzimInd = np.zeros(self.rotor.annuliQuantity)
         
         self.glauertToggle = glauertToggle
         self.prandtlToggle = prandtlToggle
                
         #Initializing dependent attributes    
-        self.annulusAxialVelc = np.zeros(rotor.annuliQuantity)
-        self.annulusAzimVelc = np.zeros(rotor.annuliQuantity)
-        self.annulusResVelc = np.zeros(rotor.annuliQuantity)
-        self.annulusInflow = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeAoA = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeCl = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeCd = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeLift2D = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeDrag2D = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeAxialLoad2D = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeAzimLoad2D = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeAxialLoad3D = np.zeros(rotor.annuliQuantity)
-        self.annulusBladeAzimLoad3D = np.zeros(rotor.annuliQuantity)
-        self.annulusMomAxialLoad3D = np.zeros(rotor.annuliQuantity)
-        self.annulusMomAzimLoad3D = np.zeros(rotor.annuliQuantity)
-        self.annulusCT = np.zeros(rotor.annuliQuantity)
-        self.annulusAxialIndCorrected = np.zeros(rotor.annuliQuantity)
-        self.annulusAzimIndCorrected = np.zeros(rotor.annuliQuantity)
+        self.annulusAxialVelc = np.zeros(self.rotor.annuliQuantity)
+        self.annulusAzimVelc = np.zeros(self.rotor.annuliQuantity)
+        self.annulusResVelc = np.zeros(self.rotor.annuliQuantity)
+        self.annulusInflow = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeAoA = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeCl = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeCd = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeLift2D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeDrag2D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeAxialLoad2D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeAzimLoad2D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeAxialLoad3D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusBladeAzimLoad3D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusMomAxialLoad3D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusMomAzimLoad3D = np.zeros(self.rotor.annuliQuantity)
+        self.annulusCT = np.zeros(self.rotor.annuliQuantity)
+        self.annulusAxialIndCorrected = np.zeros(self.rotor.annuliQuantity)
+        self.annulusAzimIndCorrected = np.zeros(self.rotor.annuliQuantity)
         
         print(f"Momentum parameters initialized for {self.rotor.name}!")
         
@@ -87,6 +90,10 @@ class BEM:
             self.annulusAxialIndCorrected[ID] = 0.5 * (1 - np.sqrt(1 - self.annulusCT[ID]))        
         
         self.annulusAzimIndCorrected[ID] = self.annulusBladeAzimLoad2D[ID] / (2 * self.fstreamRho * (2 * np.pi* self.rotor.annulusLoc[ID] * self.rotor.rotorRadius) * self.fstreamVelc**2 * (1 - self.annulusAxialIndCorrected[ID]) * self.tsr * self.rotor.annulusLoc[ID])
+        
+        if self.prandtlToggle:
+            
+            self.annulusAxialIndCorrected[ID], self.annulusAzimIndCorrected[ID] = prandtlsCorrectionSingleDOF(self.rotor.bladeQuantity, self.rotor.bladeRootLoc, self.rotor.annulusLoc[ID], self.annulusTSR[ID], self.annulusAxialIndCorrected[ID], self.annulusAzimIndCorrected[ID])
                 
     def classicSolver(self, minError = 1e-5, maxIterations = 100, relaxationFactor = 0.3):
         
@@ -115,8 +122,8 @@ class BEM:
             print(f"Annulus axial loading from momentum theory = {np.round(self.annulusMomAxialLoad3D[annulusID],2)} N")
             print(f"Annulus azimuthal loading from momentum theory = {np.round(self.annulusMomAzimLoad3D[annulusID],2)} N")
             print("")
-            print(f"Final annulus axial induction = {self.annulusAxialInd[annulusID]}")
-            print(f"Final annulus azimuthal induction = {self.annulusAzimInd[annulusID]}")
+            print(f"Final annulus axial induction = {self.annulusAxialIndCorrected[annulusID]}")
+            print(f"Final annulus azimuthal induction = {self.annulusAzimIndCorrected[annulusID]}")
             print("")
             print(f"Final axial induction error = {self.annulusAxialInd[annulusID] - self.annulusAxialIndCorrected[annulusID]}")
             print(f"Final azimuthal induction error = {self.annulusAzimInd[annulusID] - self.annulusAzimIndCorrected[annulusID]}")
@@ -128,7 +135,20 @@ class BEM:
         
             print(f"Solving for annulus ID = {annulusID} ...")
             
-            optz.direct(optzFunction, bounds = [(0,0.95), (0,0.95)], args = (self, annulusID))
+            res = optz.direct(optzFunction, bounds = [(0,0.95),], args = (self, annulusID), maxfun=10000, maxiter=10000, len_tol = 1e-10)
+            print(res.message)
+            #optz.direct(optzFunction2Args, bounds = [(0,0.95), (0,0.95)], args = (self, annulusID))
+            
+            #Compute final induction errors
+            axialIndError = np.absolute(self.annulusAxialInd[annulusID] - self.annulusAxialIndCorrected[annulusID])
+            azimIndError = np.absolute(self.annulusAzimInd[annulusID] - self.annulusAzimIndCorrected[annulusID])
+            
+            #Pass on correct induction values to determine loads accurately
+            self.annulusAxialInd[annulusID] = self.annulusAxialIndCorrected[annulusID]
+            self.annulusAzimInd[annulusID] = self.annulusAzimIndCorrected[annulusID]
+            
+            #Update load computation
+            self.indToBladeLoadSingleDOF(annulusID)
             
             print("")    
             print(f"Annulus axial loading from blade element theory = {np.round(self.annulusBladeAxialLoad3D[annulusID],2)} N")
@@ -137,11 +157,11 @@ class BEM:
             print(f"Annulus axial loading from momentum theory = {np.round(self.annulusMomAxialLoad3D[annulusID],2)} N")
             print(f"Annulus azimuthal loading from momentum theory = {np.round(self.annulusMomAzimLoad3D[annulusID],2)} N")
             print("")
-            print(f"Final annulus axial induction = {self.annulusAxialInd[annulusID]}")
-            print(f"Final annulus azimuthal induction = {self.annulusAzimInd[annulusID]}")
+            print(f"Final annulus axial induction = {self.annulusAxialIndCorrected[annulusID]}")
+            print(f"Final annulus azimuthal induction = {self.annulusAzimIndCorrected[annulusID]}")
             print("")
-            print(f"Final axial induction error = {self.annulusAxialInd[annulusID] - self.annulusAxialIndCorrected[annulusID]}")
-            print(f"Final azimuthal induction error = {self.annulusAzimInd[annulusID] - self.annulusAzimIndCorrected[annulusID]}")
+            print(f"Final axial induction error = {axialIndError}")
+            print(f"Final azimuthal induction error = {azimIndError}")
             print("===================================================================")
     
         
