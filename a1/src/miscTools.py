@@ -15,7 +15,8 @@ def optzFunction(optzArg, BEMObject, annulusID):
     BEMObject.indToBladeLoadSingleDOF(annulusID)
     BEMObject.momLoadToIndSingleDOF(annulusID)
     
-    axialIndError = BEMObject.annulusAxialInd[annulusID] - BEMObject.annulusAxialIndCorrected[annulusID]
+    #axialIndError = BEMObject.annulusAxialInd[annulusID] - BEMObject.annulusAxialIndCorrected[annulusID]
+    axialIndError = optzArg - BEMObject.annulusAxialIndCorrected[annulusID]
     
     iterationError = np.absolute(axialIndError)
     
@@ -29,8 +30,8 @@ def optzFunction2Args(optzArgs, BEMObject, annulusID):
     BEMObject.indToBladeLoadSingleDOF(annulusID)
     BEMObject.momLoadToIndSingleDOF(annulusID)
     
-    axialIndError = BEMObject.annulusAxialInd[annulusID] - BEMObject.annulusAxialIndCorrected[annulusID]    
-    azimIndError = BEMObject.annulusAzimInd[annulusID] - BEMObject.annulusAzimIndCorrected[annulusID]
+    axialIndError = (BEMObject.annulusAxialInd[annulusID] - BEMObject.annulusAxialIndCorrected[annulusID]) / BEMObject.annulusAxialIndCorrected[annulusID]    
+    azimIndError = (BEMObject.annulusAzimInd[annulusID] - BEMObject.annulusAzimIndCorrected[annulusID]) / BEMObject.annulusAzimIndCorrected[annulusID]
     
     iterationError = np.sqrt(axialIndError**2 + azimIndError**2)
 

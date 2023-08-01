@@ -21,7 +21,7 @@ bladePitch1 = -2
 fstreamVelc1 = 10
 fstreamRho1 = 1.225
 fstreamPres1 = 1e5
-tsr1 = 6
+tsr1 = 10
 bladeRootLoc1 = 0.2
 bladeTipLoc1 = 1.0
 bladeTwistDist1 = lambda ndimRadius : 14*(1 - ndimRadius)
@@ -31,11 +31,11 @@ bladeChordDist1 = lambda ndimRadius : (3*(1 - ndimRadius)) + 1
 afoilPolar1 = np.loadtxt(homeDir + "/polarDU95W180.csv", delimiter=",")
 
 rotor1 = rotor(dia1, numberOfBlades1, bladeRootLoc1, bladeTipLoc1, bladeTwistDist1, bladeChordDist1, afoilPolar1, 40)
-BEMrotor1 = BEM(rotor1, bladePitch1, fstreamVelc1, fstreamRho1, fstreamPres1, tsr1, glauertToggle=True, prandtlToggle= True)
+BEMrotor1 = BEM(rotor1, bladePitch1, fstreamVelc1, fstreamRho1, fstreamPres1, tsr1, glauertToggle=True, prandtlToggle=False)
 
-#BEMrotor1.classicSolver()
+BEMrotor1.classicSolver(relaxationFactor=0.01, maxIterations=10000)
 
-BEMrotor1.optzSolver()
+#BEMrotor1.optzSolver()
 
 
 
