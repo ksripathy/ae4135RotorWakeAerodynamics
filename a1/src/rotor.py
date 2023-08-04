@@ -19,6 +19,7 @@ class rotor:
         self.name = name
         
         self.rotorRadius = 0.5 * rotorDia
+        self.rotorArea = np.pi * self.rotorRadius**2
         
         self.annulusID = np.arange(self.annuliQuantity)
         radialLoc = np.linspace(self.bladeRootLoc, self.bladeTipLoc, self.annuliQuantity + 1)
