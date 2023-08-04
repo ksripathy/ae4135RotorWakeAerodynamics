@@ -11,6 +11,8 @@ def optzFunction(optzArg, BEMObject, annulusID):
     #Since optimizer chooses the input argument randomly, azimuthal induction needs to be adjusted accordingly apriori in order to represent the inflow accurately
     BEMObject.annulusAxialInd[annulusID] = optzArg
     BEMObject.annulusAzimInd[annulusID] = BEMObject.annulusBladeAzimLoad2D[annulusID] / (2 * BEMObject.fstreamRho * (2 * np.pi* BEMObject.rotor.annulusLoc[annulusID] * BEMObject.rotor.rotorRadius) * BEMObject.fstreamVelc**2 * (1 - BEMObject.annulusAxialIndCorrected[annulusID]) * BEMObject.tsr * BEMObject.rotor.annulusLoc[annulusID])
+    #Prandtl correction if any
+    BEMObject.annulusAzimInd[annulusID] = BEMObject.annulusAzimInd[annulusID]/BEMObject.annulusPrandtlCorrectionFactor[annulusID]
     
     BEMObject.indToBladeLoadSingleDOF(annulusID)
     BEMObject.momLoadToIndSingleDOF(annulusID)
