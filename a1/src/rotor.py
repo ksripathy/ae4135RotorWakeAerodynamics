@@ -26,7 +26,8 @@ class rotor:
         #Annulus location is defined wrt non-dimensionalized radial location as the mid point of radial boundaries
         self.annulusLoc = movingAverage(radialLoc)
         self.annulusSpan = np.diff(radialLoc) * self.rotorRadius
-        self.annulusArea = 2 * np.pi * (self.annulusLoc * self.rotorRadius) * self.annulusSpan
+        #self.annulusArea = 2 * np.pi * (self.annulusLoc * self.rotorRadius) * self.annulusSpan
+        self.annulusArea = np.pi * ((self.annulusLoc * self.rotorRadius + self.annulusSpan)**2 - (self.annulusLoc * self.rotorRadius)**2) #More accurate annulus area definition
         
         #Initialising annulus blade element parameters
         self.annulusBladeTwist = self.bladeTwistDist(self.annulusLoc)
