@@ -11,14 +11,22 @@ class mesh:
         
         self.annulusID = np.arange(self.annuliQuantity)
         radialLoc = np.linspace(self.rotor.bladeRootLoc, self.rotor.bladeTipLoc, self.annuliQuantity + 1)
+        self.annulusLocRoot = radialLoc[:-1]
+        self.annulusLocTip = radialLoc[1:]
         #Annulus location is defined wrt non-dimensionalized radial location as the mid point of radial boundaries
-        self.annulusLoc = movingAverage(radialLoc)
+        #self.annulusLoc = movingAverage(radialLoc)
+        self.annulusLoc = 0.5 * (self.annulusLocRoot + self.annulusLocTip)
         self.annulusSpan = np.diff(radialLoc) * self.rotor.radius
         #self.annulusArea = 2 * np.pi * (self.annulusLoc * self.radius) * self.annulusSpan
         self.annulusArea = np.pi * ((self.annulusLoc * self.rotor.radius + self.annulusSpan)**2 - (self.annulusLoc * self.rotor.radius)**2) #More accurate annulus area definition
         
         #Initialising annulus blade element parameters
+        self.annulusBladeTwistRoot = self.rotor.bladeTwistDist(self.annulusLocRoot) + self.rotor.bladePitch
+        self.annulusBladeTwistTip = self.rotor.bladeTwistDist(self.annulusLocTip) + self.rotor.bladePitch
         self.annulusBladeTwist = self.rotor.bladeTwistDist(self.annulusLoc) + self.rotor.bladePitch
+        
+        self.annulusBladeChordRoot = self.rotor.bladeChordDist(self.annulusLocRoot)
+        self.annulusBladeChordTip = self.rotor.bladeChordDist(self.annulusLocTip)
         self.annulusBladeChord = self.rotor.bladeChordDist(self.annulusLoc)
         
         self.rotorOmega = self.rotor.tsr * self.wind.fstreamVelc / self.rotor.radius
