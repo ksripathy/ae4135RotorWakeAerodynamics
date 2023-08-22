@@ -1,5 +1,6 @@
 from vortexRing import vortexRing
 import numpy as np
+import copy
 
 class VM:
     
@@ -17,9 +18,17 @@ class VM:
              bladeObj = getattr(self.mesh, f"annulusBlade{i}")
              setattr(bladeObj, "rootVortHistory", np.empty(self.totalTimeSteps,dtype=np.ndarray))
              setattr(bladeObj, "tipVortHistory", np.empty(self.totalTimeSteps,dtype=np.ndarray))
+             setattr(bladeObj, "QChordHistory", np.empty(self.totalTimeSteps,dtype=np.ndarray))
              
-        self.rootVortHistory = np.empty(self.totalTimeSteps,dtype=np.ndarray)
-        self.tipVortHistory = np.empty(self.totalTimeSteps,dtype=np.ndarray)
+             #Initalising each time step of Qchord history with all annuli
+             for j in range(self.totalTimeSteps):
+                 
+                 bladeObj.QChordHistory[j] = np.empty(self.mesh.annuliQuantity, dtype=np.ndarray)
+                 
+                 
+             
+        #self.rootVortHistory = np.empty(self.totalTimeSteps,dtype=np.ndarray)
+        #self.tipVortHistory = np.empty(self.totalTimeSteps,dtype=np.ndarray)
         
         
     def buildVortRings(self):
@@ -55,13 +64,19 @@ class VM:
                     #Rotate the rotor by one time step thereby the locations of bound vortex as well
                     bladeObj.vortSys[j][0].rotate(self.mesh.rotorOmega, self.deltaTime)
                     
+                    #Recording root and tip trailing vortex history
                     if j == 0:
                         
-                        bladeObj.rootVortHistory[k] = bladeObj.vortSys[j][:k+2]
+                        bladeObj.rootVortHistory[k] = copy.deepcopy(bladeObj.vortSys[j][:k+2])
                         
                     if j == self.mesh.annuliQuantity - 1:
                         
-                        bladeObj.tipVortHistory[k] = bladeObj.vortSys[j][:k+2]
+                        bladeObj.tipVortHistory[k] = copy.deepcopy(bladeObj.vortSys[j][:k+2])
+                        
+                    #Recording bound vortex history
+                    bladeObj.QChordHistory[k][j] = copy.deepcopy(bladeObj.vortSys[j][0])
+            
+            
                         
                         
                     
