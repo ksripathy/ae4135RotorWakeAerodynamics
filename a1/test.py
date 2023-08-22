@@ -2,7 +2,6 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import copy
 
 #Configuring relative file locations
 homeDir = os.path.dirname(__file__)
@@ -18,6 +17,7 @@ from src.mesh import mesh
 from src.vortexRing import vortexRing
 from src.miscTools import attributeArray
 from src.VM import VM
+from src.plot import animVortRings
 
 dia1 = 100
 numberOfBlades1 = 3
@@ -36,7 +36,7 @@ afoilPolar1 = np.loadtxt(homeDir + "/polarDU95W180.csv", delimiter=",")
 
 rotor1 = rotor(dia1, tsr1, numberOfBlades1, bladeRootLoc1, bladeTipLoc1, bladePitch1, bladeTwistDist1, bladeChordDist1, afoilPolar1)
 wind1 = wind(fstreamVelc1, fstreamRho1, fstreamPres1)
-mesh11 = mesh(rotor1, wind1, 80)
+mesh11 = mesh(rotor1, wind1, 20)
 
 #Build blades for vortex model
 mesh11.buildBlades()
@@ -54,7 +54,11 @@ VMmesh11 = VM(mesh11, wakeCoverage, wakeVelc, deltaTime)
 #Build vortex rings for all blades
 VMmesh11.buildVortRings()
 
-fig1, ax1 = plt.subplots(subplot_kw={"projection":"3d"})
+
+plots = animVortRings(VMmesh11)
+anim = plots.run()
+
+'''fig1, ax1 = plt.subplots(subplot_kw={"projection":"3d"})
 
 b0Qchord = np.empty((mesh11.annuliQuantity,3), dtype=np.ndarray)
 b1Qchord = np.empty((mesh11.annuliQuantity,3), dtype=np.ndarray)
@@ -79,7 +83,7 @@ ax1.plot(b0Qchord[:,0], b0Qchord[:,1], b0Qchord[:,2], color='k')
 ax1.plot(b1Qchord[:,0], b1Qchord[:,1], b1Qchord[:,2], color='k')
 ax1.plot(b2Qchord[:,0], b2Qchord[:,1], b2Qchord[:,2], color='k')
         
-plt.show()
+plt.show()'''
 
 '''#Initialize numpy array of vortex rings
 blade1VortexRings = np.empty(totalTimeSteps + 1, dtype=np.ndarray)

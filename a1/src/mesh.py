@@ -59,27 +59,18 @@ class mesh:
         self.annulusAzimIndCorrected = np.zeros(self.annuliQuantity)
         self.annulusMomCT = np.zeros(self.annuliQuantity)
         self.annulusMomCQ = np.zeros(self.annuliQuantity)
-        self.annulusMomCP = np.zeros(self.annuliQuantity)
+        self.annulusMomCP = np.zeros(self.annuliQuantity)        
         
         print(f"{self.rotor.name} has been created, discretized into {self.annuliQuantity} sections and initialized!")
         
     def buildBlades(self):
-        
-        
-        
+            
         for i in range(self.rotor.bladeQuantity):
             
             azimInit = i * (360/self.rotor.bladeQuantity)
             #Depending on requested number of blades setattr allows us to dynamically generate blade object attribute to mesh object
             setattr(self, f"annulusBlade{i}", blade(self.annuliQuantity, azimInit))
-            
-    def animateRings(self):
-        
-        for i in range(self.rotor.bladeQuantity):
-            
-            bladeObj = getattr(self, f"annulusBlade{i}")
-            
-            
+           
 #Blade class for facilitating vortex model
 class blade:
     
